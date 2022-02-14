@@ -1,11 +1,15 @@
 <script lang="ts" setup>
 import { reactive } from "vue";
+import {useRouter} from 'vue-router';
 
 const state = reactive({ name: "" });
+const router = useRouter();
+
 const startGame = () => {
-  alert("ユーザー名:$state.name");
+  router.push({name: "PlayPage", query: {name: state.name} });
 };
 </script>
+
 
 <template>
   <h1>トップ画面</h1>
@@ -19,6 +23,7 @@ const startGame = () => {
   <br />
   <button @click="startGame()">ゲームスタート！</button>
 </template>
+
 
 <style scoped>
 input {
