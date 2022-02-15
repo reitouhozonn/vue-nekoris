@@ -1,42 +1,6 @@
 <script lang="ts" setup>
 
-const row = 20;
-const column = 10;
-
-const field = new Array(row);
-
-for (let i = 0; i < row; i++) {
-  const fieldColumn = new Array(column).fill(0);
-  field[i] = fieldColumn;
-  }
-
-  field[0][0] = 2;
-  field[1][0] = 1;
-  field[2][0] = 1;
-  field[3][0] = 1;
-
   const classBlockColor = (x: number, y: number): string => {
-    const type = field[y][x];
-    if (type > 0) {
-      switch (type) {
-        case 1:
-          return "block-i";
-        case 2:
-          return "block-o";
-        case 3:
-          return "block-s";
-        case 4:
-          return "block-z";
-        case 5:
-          return "block-j";
-        case 6:
-          return "block-l";
-        case 7:
-          return "block-t";
-        default:
-          return "";
-        }
-    }
   };
 </script>
 
@@ -54,7 +18,7 @@ for (let i = 0; i < row; i++) {
         <td
           class="block"
           v-for="(col, x) in row"
-          :key="() => '${x}${y}'"
+          :key="(x)"
           v-bind:class="classBlockColor(x,y)"
         ></td>
       </tr>
@@ -77,8 +41,8 @@ for (let i = 0; i < row; i++) {
 }
 
 .block {
-  width: 1em;
-  height: 1em;
+  width: 1.3em;
+  height: 1.3em;
   border: 0.1px solid #95a5a6;
   &-i {
     background: #3498db;
@@ -103,51 +67,3 @@ for (let i = 0; i < row; i++) {
   }
 }
 </style>
-
-
-
-
-
-
-
-
-// const tetrominos = [
-//   [
-//     // 0: 空白
-//     [0],
-//   ],
-//   [
-//     // 1: I-テトリミノ（水色）
-//     [1, 1, 1, 1],
-//   ],
-//   [
-//     // 2: O-テトリミノ（黄色）
-//     [2, 2],
-//     [2, 2],
-//   ],
-//   [
-//     // 3: S-テトリミノ（緑）
-//     [0, 3, 3],
-//     [3, 3, 0],
-//   ],
-//   [
-//     // 4: Z-テトリミノ（赤）
-//     [4, 4, 0],
-//     [0, 4, 4],
-//   ],
-//   [
-//     // 5: J-テトリミノ（青）
-//     [0, 0, 5],
-//     [5, 5, 5],
-//   ],
-//   [
-//     // 6: L-テトリミノ（オレンジ）
-//     [6, 0, 0],
-//     [6, 6, 6],
-//   ],
-//   [
-//     // 7: T-テトリミノ（紫）
-//     [0, 7, 0],
-//     [7, 7, 7],
-//   ],
-// ];
