@@ -28,6 +28,7 @@ export class Field {
             const cols = data[i];
             for (let j = 0; j < cols.length; j++) {
                 const block = cols[j];
+
                 if (block > 0) {
                     this.field[i + position.y][j + position.x] = block;
                 }
