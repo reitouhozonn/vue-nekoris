@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 
-import { reactive } from 'vue';
-import { Tetromino, TETROMINO_TYPE} from "../common/Tetromino";
-import {Field} from '../common/Field';
+import { reactive, onMounted, onBeforeUnmount } from 'vue';
+import { Tetromino, TETROMINO_TYPE } from "../common/Tetromino";
+import { Field } from '../common/Field';
+// import func from '../../vue-temp/vue-editor-bridge';
+
+import TetrominoPreviewComponent from '../components/TetrominoPreviewComponent.vue';
 
 let staticField = new Field();
 const tetris = reactive({
@@ -11,7 +14,8 @@ const tetris = reactive({
 
 const tetromino = reactive({
   current: Tetromino.random(),
-  position: {x:3, y:0},
+  position: { x: 3, y: 0 },
+  next: Tetromino.random(),
 });
 
 const classBlockColor = (_x: number, _y: number): string => {
@@ -20,12 +24,12 @@ const classBlockColor = (_x: number, _y: number): string => {
     return Tetromino.id(type as TETROMINO_TYPE);
   }
 
-  const {x, y} = tetromino.position;
+  const { x, y } = tetromino.position;
   const { data } = tetromino.current;
 
   if (y <= _y && _y < y + data.length) {
     const cols = data[_y - y];
-    if(x <= _x && _x < x + cols.length){
+    if (x <= _x && _x < x + cols.length) {
       if (cols[_x - x] > 0) {
         return Tetromino.id(cols[_x - x] as TETROMINO_TYPE);
       }
@@ -34,16 +38,74 @@ const classBlockColor = (_x: number, _y: number): string => {
   return "";
 };
 
-const updateTime = 500;
+const canDropCurrentTetromino = (): Boolean => {
+  const { x, y } = tetromino.position;
+  const droppedPosition = { x, y: y + 1 };
 
-setInterval(() => {
+  const data = tetromino.current.data;
+  return tetris.field.canMove(data, droppedPosition);
+}
+
+const nextTetrisField = () => {
+  const data = tetromino.current.data;
+  const position = tetromino.position;
+
+  tetris.field.update(data, position);
+
+  staticField = new Field(tetris.field.data);
   tetris.field = Field.deepCopy(staticField);
 
-  tetromino.position.y++;
-  tetris.field.update(tetromino.current.data, tetromino.position);
-}, 1 * updateTime);
+  tetromino.current = tetromino.next;
+  tetromino.next = Tetromino.random();
+  tetromino.position = { x: 3, y: 0 };
+}
 
-tetris.field.update(tetromino.current.data, tetromino.position);
+
+const onKeyDown = (e: KeyboardEvent) => {
+  switch (e.key) {
+    case "Down":
+    case "ArrowDown":
+      if (canDropCurrentTetromino()) {
+        tetromino.position.y++;
+        resetDrop();
+      } else {
+        nextTetrisField();
+      }
+      break;
+  }
+}
+
+onMounted(function () {
+  document.addEventListener('keydown', onKeyDown);
+});
+onBeforeUnmount(function () {
+  document.removeEventListener('keydown', onKeyDown);
+});
+
+
+
+const dropTime = 500;
+
+const resetDropInterval = () => {
+  let interval = -1;
+
+  return () => {
+    if (interval !== -1) clearInterval(interval);
+    interval = setInterval(() => {
+      tetris.field = Field.deepCopy(staticField);
+
+      if (canDropCurrentTetromino()) {
+        tetromino.position.y++;
+      } else {
+        nextTetrisField();
+      }
+    }, 1 * dropTime);
+  }
+}
+
+// tetris.field.update(tetromino.current.data, tetromino.position);
+const resetDrop = resetDropInterval();
+resetDrop();
 
 </script>
 
@@ -54,25 +116,22 @@ tetris.field.update(tetromino.current.data, tetromino.position);
   </div>
 
   <div class="container">
-    <table class="field" style="border-collapse: collapse">
-      <tr
-        v-for="(row, y) in tetris.field.data"
-        :key="y">
-        <td
-          class="block"
-          v-for="(col, x) in row"
-          :key="(x)"
-          v-bind:class="classBlockColor(x,y)"
-        ></td>
-      </tr>
-    </table>
+    <div class="tetris">
+      <table class="field" style="border-collapse: collapse">
+        <tr v-for="(row, y) in tetris.field.data" :key="y">
+          <td class="block" v-for="(col, x) in row" :key="(x)" v-bind:class="classBlockColor(x, y)"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="information">
+      <TetrominoPreviewComponent v-bind:tetromino="tetromino.next.data" />
+    </div>
   </div>
 </template>
 
 
 <style lang="scss" scoped>
-
-.container{
+.container {
   display: flex;
   justify-content: center;
   align-items: stretch;
@@ -108,5 +167,9 @@ tetris.field.update(tetromino.current.data, tetromino.position);
   &-z {
     background: #e74c3c;
   }
+}
+
+.information {
+  margin-left: 1em;
 }
 </style>
