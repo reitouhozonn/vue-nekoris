@@ -90,4 +90,14 @@ export class Tetromino {
 
         return new Tetromino(type as TETROMINO_TYPE);
     }
+
+    static rotate(num: number, data: number[][]): number[][] {
+        let tetromino: number[][] = data;
+        for (let i = 0; i < num; i++) {
+            tetromino = tetromino[0].map((_, index) =>
+                tetromino.map((row) => row[index]).reverse()
+            );
+        }
+        return tetromino;
+    }
 }
