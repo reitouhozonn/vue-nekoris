@@ -8,8 +8,10 @@ import { Field } from '../common/Field';
 import TetrominoPreviewComponent from '../components/TetrominoPreviewComponent.vue';
 
 let staticField = new Field();
+
 const tetris = reactive({
   field: new Field(),
+  score: 0,
 });
 
 const tetromino = reactive({
@@ -56,9 +58,11 @@ const nextTetrisField = () => {
   const position = tetromino.position;
 
   tetris.field.update(data, position);
+  const { field, score } = deleteLine();
 
-  staticField = new Field(tetris.field.data);
+  staticField = new Field(field);
   tetris.field = Field.deepCopy(staticField);
+  tetris.score += score;
 
   tetromino.current = tetromino.next;
   tetromino.next = Tetromino.random();
@@ -117,6 +121,22 @@ const onKeyDown = (e: KeyboardEvent) => {
   }
 }
 
+const deleteLine = () => {
+  let score = 0;
+  const field = tetris.field.data.filter((row) => {
+    if (row.every(col => col > 0)) {
+      score++;
+      return false;
+    }
+    return true;
+  });
+
+  for (let i = 0; i < score; i++) {
+    field.unshift(new Array(field[0].length).fill(0));
+  }
+  return { score, field };
+};
+
 onMounted(function () {
   document.addEventListener('keydown', onKeyDown);
 });
@@ -167,6 +187,9 @@ resetDrop();
     </div>
     <div class="information">
       <TetrominoPreviewComponent v-bind:tetromino="tetromino.next.data" />
+      <ul class="data">
+        <li>スコア: {{ tetris.score }}</li>
+      </ul>
     </div>
   </div>
 </template>
@@ -212,6 +235,15 @@ resetDrop();
 }
 
 .information {
+  position: relative;
   margin-left: 1em;
+
+  ul.data {
+    list-style: none;
+    position: absolute;
+    font-size: 1.3em;
+    padding-left: 0;
+    bottom: 0;
+  }
 }
 </style>
