@@ -91,6 +91,10 @@ export class Tetromino {
         return new Tetromino(type as TETROMINO_TYPE);
     }
 
+    static empty(): Tetromino {
+        return new Tetromino(0 as TETROMINO_TYPE);
+    }
+
     static rotate(num: number, data: number[][]): number[][] {
         let tetromino: number[][] = data;
         for (let i = 0; i < num; i++) {
