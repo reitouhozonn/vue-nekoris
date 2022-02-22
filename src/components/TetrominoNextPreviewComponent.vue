@@ -8,7 +8,7 @@ interface props {
 }
 
 const props = withDefaults(defineProps<props>(), {
-    tetromino: undefined,
+    tetromino: undefined
 });
 
 const classPreviewBlockColor = (type: number) => {
@@ -20,7 +20,7 @@ const classPreviewBlockColor = (type: number) => {
 
 <template>
     <div class="tetromino-preview">
-        <label>次のブロック</label>
+        <label>次次のブロック</label>
         <table class="field" style="border-collapse: collapse">
             <tr v-for="(row, y) in props.tetromino" :key="y">
                 <td
@@ -67,7 +67,6 @@ const classPreviewBlockColor = (type: number) => {
     height: 5.5em;
     padding: 0.1em;
     border: solid 2px #2c3e50;
-    margin-bottom: 1em;
 
     .field {
         border-collapse: collapse;

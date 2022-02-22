@@ -6,6 +6,7 @@ import { Field } from '../common/Field';
 // import func from '../../vue-temp/vue-editor-bridge';
 
 import TetrominoPreviewComponent from '../components/TetrominoPreviewComponent.vue';
+import TetrominoNextPreviewComponent from '../components/TetrominoNextPreviewComponent.vue';
 
 const PLAY_STATUS = {
   GAMESTART: 1,
@@ -37,6 +38,7 @@ watch(gameStatus, (currentState) => {
 
       tetromino.current = Tetromino.random();
       tetromino.next = Tetromino.random();
+      tetromino.nextNext = Tetromino.random();
 
       tetris.score = 0;
       resetDrop();
@@ -46,6 +48,7 @@ watch(gameStatus, (currentState) => {
       document.removeEventListener('keydown', onKeyDown);
 
       tetromino.next = Tetromino.empty();
+      tetromino.nextNext = Tetromino.empty();
       break;
   }
 })
@@ -55,6 +58,7 @@ const tetromino = reactive({
   position: { x: 3, y: 0 },
   rotate: 0,
   next: Tetromino.empty(),
+  nextNext: Tetromino.empty(),
 });
 
 const currentTetrominoData = () => {
@@ -101,7 +105,8 @@ const nextTetrisField = () => {
   tetris.score += score;
 
   tetromino.current = tetromino.next;
-  tetromino.next = Tetromino.random();
+  tetromino.next = tetromino.nextNext;
+  tetromino.nextNext = Tetromino.random();
   tetromino.rotate = 0;
   tetromino.position = { x: 3, y: 0 };
 
@@ -224,6 +229,7 @@ const resetDrop = resetDropInterval();
     </div>
     <div class="information">
       <TetrominoPreviewComponent v-bind:tetromino="tetromino.next.data" />
+      <TetrominoNextPreviewComponent v-bind:tetromino="tetromino.nextNext.data" />
       <ul class="data">
         <li>スコア: {{ tetris.score }}</li>
         <li>
