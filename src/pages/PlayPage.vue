@@ -2,8 +2,8 @@
 
 import { reactive, onBeforeUnmount, watch } from 'vue';
 import { Tetromino, TETROMINO_TYPE } from "../common/Tetromino";
+import { Level } from "../common/Level";
 import { Field } from '../common/Field';
-// import func from '../../vue-temp/vue-editor-bridge';
 
 import TetrominoPreviewComponent from '../components/TetrominoPreviewComponent.vue';
 import TetrominoNextPreviewComponent from '../components/TetrominoNextPreviewComponent.vue';
@@ -15,6 +15,15 @@ const PLAY_STATUS = {
 } as const;
 type PLAY_STATUS = typeof PLAY_STATUS[keyof typeof PLAY_STATUS];
 
+const DIFFICULTY_TYPE = {
+  EASY: 1000,
+  NORMAL: 500,
+  HARD: 250,
+  MASTER: 100,
+  EXTREME: 50,
+} as const;
+type DIFFICULTY_TYPE = typeof DIFFICULTY_TYPE;
+
 let staticField = new Field();
 
 const gameStatus = reactive({ gameStatus: PLAY_STATUS.GAMESTART as PLAY_STATUS });
@@ -24,6 +33,7 @@ const gameStart = () => gameStatus.gameStatus = PLAY_STATUS.PLAYING;
 const tetris = reactive({
   field: new Field(),
   score: 0,
+  level: "",
 });
 
 watch(gameStatus, (currentState) => {
@@ -103,6 +113,8 @@ const nextTetrisField = () => {
   staticField = new Field(field);
   tetris.field = Field.deepCopy(staticField);
   tetris.score += score;
+
+
 
   tetromino.current = tetromino.next;
   tetromino.next = tetromino.nextNext;
@@ -187,9 +199,26 @@ onBeforeUnmount(function () {
   document.removeEventListener('keydown', onKeyDown);
 });
 
-
-
-const dropTime = 500;
+const getDropTime = () => {
+  if (tetris.score >= 5) {
+    tetris.level = Level.id(DIFFICULTY_TYPE.NORMAL);
+    return DIFFICULTY_TYPE.NORMAL;
+  }
+  if (tetris.score >= 20) {
+    tetris.level = Level.id(DIFFICULTY_TYPE.HARD);
+    return DIFFICULTY_TYPE.HARD;
+  }
+  if (tetris.score >= 50) {
+    tetris.level = Level.id(DIFFICULTY_TYPE.MASTER);
+    return DIFFICULTY_TYPE.MASTER;
+  }
+  if (tetris.score >= 100) {
+    tetris.level = Level.id(DIFFICULTY_TYPE.EXTREME);
+    return DIFFICULTY_TYPE.EXTREME;
+  }
+  tetris.level = Level.id(DIFFICULTY_TYPE.EASY);
+  return DIFFICULTY_TYPE.EASY;
+}
 
 const resetDropInterval = () => {
   let intervalId = -1;
@@ -205,7 +234,7 @@ const resetDropInterval = () => {
       } else {
         nextTetrisField();
       }
-    }, 1 * dropTime);
+    }, 1 * getDropTime());
   };
 };
 
@@ -231,6 +260,7 @@ const resetDrop = resetDropInterval();
       <TetrominoPreviewComponent v-bind:tetromino="tetromino.next.data" />
       <TetrominoNextPreviewComponent v-bind:tetromino="tetromino.nextNext.data" />
       <ul class="data">
+        <li v-if="!isStandby()">レベル: {{ tetris.level }}</li>
         <li>スコア: {{ tetris.score }}</li>
         <li>
           <button v-if="isStandby()" @click.self.stop="gameStart">ゲームスタート</button>
@@ -287,6 +317,7 @@ const resetDrop = resetDropInterval();
   ul.data {
     list-style: none;
     position: absolute;
+    text-align: left;
     font-size: 1.3em;
     padding-left: 0;
     bottom: 0;
